@@ -1,15 +1,13 @@
 # DanceSurvey - Hosted by fwd.dance
 
-A program for collecting information about a dancer, teacher, and/or studio owner.
+A program for connecting dancers, teachers, and studio owners for class bookings.
 
-## Question outline
+## There are 3 modes to this program
 
-* What style(s) of dance do you train in?
-* How long have you been dancing?
-* Where do you dance the most?
-* Who is your favorite dancer and/or choreographer?
-* etc..
+* Dancers - Connect with other dancers, attend dance class, train to become a teacher.
+* Teachers - Rent dance space from studios for teaching classes, and connecting your students.
+* Studios - Offer your studio for rentals to teachers for classes, events, and/or rehearsals.
 
-## Want to add more questions?
+## Want to add more suggestions?
 
 Send suggestions to [friends@fwd.dance](mailto:friends@fwd.dance?subject=DanceSurvey%20Suggestion%20Request)
