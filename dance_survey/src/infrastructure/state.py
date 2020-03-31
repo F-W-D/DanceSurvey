@@ -1,9 +1,9 @@
 from typing import Optional
 
-from data.owners import Owner
+from data.dancers import Dancer
 import services.data_service as svc
 
-active_account: Optional[Owner] = None
+active_account: Dancer = None
 
 
 def reload_account():

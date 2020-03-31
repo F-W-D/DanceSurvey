@@ -2,8 +2,9 @@ import mongoengine
 
 
 class Booking(mongoengine.EmbeddedDocument):
-    guest_owner_id = mongoengine.ObjectIdField()
-    guest_snake_id = mongoengine.ObjectIdField()
+    guest_studio_id = mongoengine.ObjectIdField()
+    guest_teacher_id = mongoengine.ObjectIdField()
+    guest_dancer_ids = mongoengine.ListField()
 
     booked_date = mongoengine.DateTimeField()
     check_in_date = mongoengine.DateTimeField(required=True)

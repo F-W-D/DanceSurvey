@@ -20,8 +20,8 @@ def run():
             s.case('c', create_account)
             s.case('a', create_account)
             s.case('l', log_into_account)
-            s.case('y', list_cages)
-            s.case('r', register_cage)
+            s.case('y', list_studios)
+            s.case('r', register_studio)
             s.case('u', update_availability)
             s.case('v', view_bookings)
             s.case('m', lambda: 'change_mode')
@@ -41,11 +41,11 @@ def show_commands():
     print('What action would you like to take:')
     print('[C]reate an [a]ccount')
     print('[L]ogin to your account')
-    print('List [y]our cages')
-    print('[R]egister a cage')
-    print('[U]pdate cage availability')
+    print('List [y]our Studios')
+    print('[R]egister a Studio')
+    print('[U]pdate Studio availability')
     print('[V]iew your bookings')
-    print('Change [M]ode (guest or host)')
+    print('Change [M]ode (dancer, teacher, studio)')
     print('e[X]it app')
     print('[?] Help (this info)')
     print()
@@ -80,47 +80,59 @@ def log_into_account():
     success_msg('Logged in successfully.')
 
 
-def register_cage():
-    print(' ****************** REGISTER CAGE **************** ')
+def register_studio():
+    print(' ****************** REGISTER A STUDIO **************** ')
 
     if not state.active_account:
-        error_msg('You must login first to register a cage.')
+        error_msg('You must login first to register a Studio.')
         return
 
-    meters = input('How many square meters is the cage? ')
-    if not meters:
+    name = input("What is the name of your Studio? ")
+    number_of_rooms = input("How many rooms do you have available at your Studio? ")
+
+    square_meters = input('What is the total square meters of your dance spaces? ')
+    if not square_meters:
         error_msg('Cancelled')
         return
 
-    meters = float(meters)
-    carpeted = input("Is it carpeted [y, n]? ").lower().startswith('y')
-    has_toys = input("Have snake toys [y, n]? ").lower().startswith('y')
-    allow_dangerous = input("Can you host venomous snakes [y, n]? ").lower().startswith('y')
-    name = input("Give your cage a name: ")
-    price = float(input("How much are you charging?  "))
+    square_meters = float(square_meters)
+    is_rentable = input("Would you rent out Studio space to local dancers for a price? [y, n]? ").lower().startswith('y')
 
-    cage = svc.register_cage(
-        state.active_account, name,
-        allow_dangerous, has_toys, carpeted, meters, price
+    if is_rentable:
+        price = input("What is the hourly rate in USD for a studio rental? ")
+        if not price:
+            error_msg('Cancelled')
+            return
+
+        price = float(price)
+    else:
+        price = 0.0
+
+    allows_adults = input("Does your studio allow adults (18+)? [y, n]? ").lower().startswith('y')
+
+    studio = svc.register_studio(
+        state.active_account,
+        name, price, square_meters,
+        is_rentable, number_of_rooms, allows_adults
     )
 
     state.reload_account()
-    success_msg(f'Register new cage with id {cage.id}.')
+    success_msg(f'Thanks for registering your new Studio with id: {studio.id}.')
 
 
-def list_cages(suppress_header=False):
+def list_studios(suppress_header=False):
     if not suppress_header:
-        print(' ******************     Your cages     **************** ')
+        print(' ******************     Your Studios     **************** ')
 
     if not state.active_account:
-        error_msg('You must login first to register a cage.')
+        error_msg('You must login first to view your Studios.')
         return
 
-    cages = svc.find_cages_for_user(state.active_account)
-    print(f"You have {len(cages)} cages.")
-    for idx, c in enumerate(cages):
-        print(f' {idx + 1}. {c.name} is {c.square_meters} meters.')
-        for b in c.bookings:
+    studios = svc.find_studios_for_user(state.active_account)
+    print(f"You own {len(studios)} Studio(s).")
+    for idx, s in enumerate(studios):
+        print(f' {idx + 1}. {s.name} is {s.square_meters} square meters and has {s.number_of_rooms} rooms.')
+        for b in s.bookings:
             print('      * Booking: {}, {} days, booked? {}'.format(
                 b.check_in_date,
                 (b.check_out_date - b.check_in_date).days,
@@ -135,58 +147,58 @@ def update_availability():
         error_msg("You must log in first to register a cage")
         return
 
-    list_cages(suppress_header=True)
+    list_studios(suppress_header=True)
 
-    cage_number = input("Enter cage number: ")
-    if not cage_number.strip():
+    studio_number = input("Enter Studio number: ")
+    if not studio_number.strip():
         error_msg('Cancelled')
-        print()
+        print("\n")
         return
 
-    cage_number = int(cage_number)
+    studio_number = int(studio_number)
 
-    cages = svc.find_cages_for_user(state.active_account)
-    selected_cage = cages[cage_number - 1]
+    studios = svc.find_studios_for_user(state.active_account)
+    selected_studio = studios[studio_number - 1]
 
-    success_msg("Selected cage {}".format(selected_cage.name))
+    success_msg("Selected Studio {}".format(selected_studio.name))
 
     start_date = parser.parse(
-        input("Enter available date [yyyy-mm-dd]: ")
+        input("Enter available date [mm-dd-yyyy]: ")
     )
-    days = int(input("How many days is this block of time? "))
+    hours = int(input("How many hours is this block of time? "))
 
     svc.add_available_date(
-        selected_cage,
+        selected_studio,
         start_date,
-        days
+        hours
     )
 
-    success_msg(f'Date added to cage {selected_cage.name}.')
+    success_msg(f'Availablity added to {selected_studio.name}.')
 
 
 def view_bookings():
     print(' ****************** Your bookings **************** ')
 
     if not state.active_account:
-        error_msg("You must log in first to register a cage")
+        error_msg("You must log in first to register a Studio")
         return
 
-    cages = svc.find_cages_for_user(state.active_account)
+    studios = svc.find_studios_for_user(state.active_account)
 
     bookings = [
-        (c, b)
-        for c in cages
-        for b in c.bookings
+        (s, b)
+        for s in studios
+        for b in s.bookings
         if b.booked_date is not None
     ]
 
     print("You have {} bookings.".format(len(bookings)))
-    for c, b in bookings:
-        print(' * Cage: {}, booked date: {}, from {} for {} days.'.format(
-            c.name,
+    for s, b in bookings:
+        print(' * Studio: {}, booked date: {}, from {} for {} hours.'.format(
+            s.name,
             datetime.date(b.booked_date.year, b.booked_date.month, b.booked_date.day),
             datetime.date(b.check_in_date.year, b.check_in_date.month, b.check_in_date.day),
-            b.duration_in_days
+            b.duration_in_hours
         ))
 
 
