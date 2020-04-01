@@ -69,9 +69,9 @@ def apply_to_teach():
         except ValueError:
             error_msg("Please use a proper number.")
             continue
-    
+
     dance_style = input("Which dance style is your specialty? ")
-    is_friend = input("Are you a Friends Who Dance™ member? [y]es, [n]o? ").lower().startswith('y')
+    is_friend = input("Are you a Friends Who Dance member? [y]es, [n]o? ").lower().startswith('y')
 
     teacher = svc.add_teacher(state.active_account, age, is_friend, dance_style)
     state.reload_account()
@@ -124,7 +124,7 @@ def book_a_class():
 
     print()
     for idx, t in enumerate(teachers):
-        print('Teacher #{} has {} years of training and teaches {}; fwd.dance™: {})'.format(
+        print('Teacher #{} has {} years of training and teaches {}; fwd.dance: {})'.format(
             idx + 1,
             t.age,
             t.dance_style,
